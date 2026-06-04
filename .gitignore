@@ -14,6 +14,3 @@ yarn-error.log*
 .vercel
 *.tsbuildinfo
 next-env.d.ts
-
-# GIFs servidos localmente — hospedar num CDN para produção
-public/fotos/
