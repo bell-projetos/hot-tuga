@@ -1,27 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Shield } from "lucide-react";
 
 export default function PresellPage() {
   const router = useRouter();
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem("pt_age_verified") === "true") {
       router.replace("/");
-      return;
     }
-    setReady(true);
   }, [router]);
 
   const handleEnter = () => {
     localStorage.setItem("pt_age_verified", "true");
     router.replace("/");
   };
-
-  if (!ready) return null;
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-4 radial-smoke">
@@ -67,7 +62,7 @@ export default function PresellPage() {
 
           <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground mt-6">
             <Shield className="size-3 text-emerald-400" />
-            Ambiente seguro e criptografado. A tua privacidade está protegida.
+            Ambiente seguro e encriptado. A tua privacidade está protegida.
           </p>
         </div>
       </div>

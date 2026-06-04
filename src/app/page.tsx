@@ -67,19 +67,15 @@ const CARDS = [
 
 export default function HubPage() {
   const router = useRouter();
-  const [verified, setVerified] = useState(false);
   const [onlineCount, setOnlineCount] = useState(1623);
 
   useEffect(() => {
     if (localStorage.getItem("pt_age_verified") !== "true") {
       router.replace("/presell");
-      return;
     }
-    setVerified(true);
   }, [router]);
 
   useEffect(() => {
-    if (!verified) return;
     const interval = setInterval(() => {
       setOnlineCount((prev) => {
         const delta = Math.floor(Math.random() * 21) - 10;
@@ -87,9 +83,7 @@ export default function HubPage() {
       });
     }, 3500);
     return () => clearInterval(interval);
-  }, [verified]);
-
-  if (!verified) return null;
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
