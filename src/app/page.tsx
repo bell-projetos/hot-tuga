@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flame, Lock, ArrowRight, Shield } from "lucide-react";
-import Image from "next/image";
 
 const CONVERSION_URL = "#";
 
@@ -14,15 +13,15 @@ const CARDS = [
     description: "Os flagras mais comentados das criadoras portuguesas — direto das stories e DMs privados.",
     badge: "🔥 EM ALTA",
     cta: "Liberar Acesso",
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=500&fit=crop&auto=format&q=80",
+    image: "/fotos/card1.gif",
   },
   {
     id: 2,
     title: "OnlyFans & Privacy VIP",
-    description: "Pastas ocultas e mídias exclusivas de perfis privados portugueses.",
+    description: "Pastas ocultas e conteúdos exclusivos de perfis privados portugueses.",
     badge: "💎 PRIVADO",
     cta: "Abrir Pasta",
-    image: "https://images.unsplash.com/photo-1557682257-2f9c37a3a5f3?w=400&h=500&fit=crop&auto=format&q=80",
+    image: "/fotos/card2.gif",
   },
   {
     id: 3,
@@ -30,31 +29,39 @@ const CARDS = [
     description: "Conteúdo real, sem edições, de amadoras portuguesas — exatamente como foi captado.",
     badge: "📸 NOVIDADE",
     cta: "Ver Fotos/Vídeos",
-    image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&h=500&fit=crop&auto=format&q=80",
+    image: "/fotos/card3.gif",
   },
   {
     id: 4,
+    title: "Transexuais Portuguesas Vazadas",
+    description: "Cenas privadas e exclusivas das criadoras trans mais seguidas em Portugal — sem censura.",
+    badge: "🌟 EXCLUSIVO",
+    cta: "Aceder ao Conteúdo",
+    image: "/fotos/card4.gif",
+  },
+  {
+    id: 5,
     title: "Canais de Telegram Secretos",
     description: "Links diretos e sem censura para os grupos mais exclusivos — sem listas de espera.",
     badge: "⚡ IMEDIATO",
     cta: "Entrar no Grupo",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=500&fit=crop&auto=format&q=80",
-  },
-  {
-    id: 5,
-    title: "Arquivos Excluídos & Backstage",
-    description: "Conteúdos apagados das redes sociais que o algoritmo removeu — recuperados aqui.",
-    badge: "🚫 EXPIRANDO",
-    cta: "Recuperar Mídias",
-    image: "https://images.unsplash.com/photo-1614851099175-e5b30eb6f696?w=400&h=500&fit=crop&auto=format&q=80",
+    image: "/fotos/card5.gif",
   },
   {
     id: 6,
+    title: "Arquivos Excluídos & Backstage",
+    description: "Conteúdos apagados das redes sociais que o algoritmo removeu — recuperados aqui.",
+    badge: "🚫 EXPIRANDO",
+    cta: "Recuperar Conteúdos",
+    image: "/fotos/card6.gif",
+  },
+  {
+    id: 7,
     title: "Pack Premium da Semana",
     description: "Coletânea selecionada da semana com o melhor conteúdo das criadoras portuguesas.",
     badge: "⭐ COMPLETO",
     cta: "Baixar Pack",
-    image: "https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=400&h=500&fit=crop&auto=format&q=80",
+    image: "/fotos/card7.gif",
   },
 ];
 
@@ -140,7 +147,7 @@ export default function HubPage() {
         </div>
       </section>
 
-      {/* Grid de cards */}
+      {/* Grelha de cards */}
       <section className="max-w-6xl mx-auto px-4 pb-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
         {CARDS.map((card) => (
           <a
@@ -148,29 +155,28 @@ export default function HubPage() {
             href={CONVERSION_URL}
             className="group relative rounded-2xl border border-white/10 bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-neon/60 hover:shadow-[0_30px_60px_-30px_rgba(229,9,20,0.6)] active:scale-[0.99]"
           >
-            {/* Imagem com blur */}
+            {/* GIF com blur */}
             <div className="relative aspect-[4/5] overflow-hidden">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={card.image}
                 alt=""
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover blur-2xl brightness-50 scale-110 group-hover:blur-xl group-hover:brightness-60 transition-all duration-500"
+                className="absolute inset-0 w-full h-full object-cover blur-2xl brightness-50 scale-110 group-hover:blur-xl group-hover:brightness-60 transition-all duration-500"
               />
 
               {/* Overlay cadeado */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
                 <div className="size-14 rounded-full bg-black/60 border border-neon/40 flex items-center justify-center glow-neon-sm group-hover:scale-110 group-hover:glow-neon transition-all duration-300">
                   <Lock className="size-6 text-neon" />
                 </div>
-                <span className="text-xs text-muted-foreground font-medium">Conteúdo Trancado</span>
+                <span className="text-xs text-muted-foreground font-medium">Conteúdo Bloqueado</span>
               </div>
 
               {/* Gradiente de fusão */}
-              <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-card to-transparent" />
+              <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-card to-transparent z-10" />
 
               {/* Badge */}
-              <div className="absolute top-3 left-3">
+              <div className="absolute top-3 left-3 z-20">
                 <span className="text-xs px-3 py-1 rounded-full bg-black/70 border border-neon/40 text-foreground font-semibold backdrop-blur-sm">
                   {card.badge}
                 </span>
@@ -194,7 +200,7 @@ export default function HubPage() {
         ))}
       </section>
 
-      {/* Footer */}
+      {/* Rodapé */}
       <footer className="border-t border-white/5 py-6 px-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -204,12 +210,12 @@ export default function HubPage() {
             <span>Acesso restrito a maiores de idade</span>
           </div>
           <div className="flex items-center gap-4 text-muted-foreground/60">
-            <a href="#" className="hover:text-foreground transition-colors">Termos de Uso</a>
+            <a href="#" className="hover:text-foreground transition-colors">Termos de Utilização</a>
             <a href="#" className="hover:text-foreground transition-colors">Política de Privacidade</a>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Lock className="size-3 text-emerald-400 shrink-0" />
-            <span>Ambiente 100% Seguro e Criptografado</span>
+            <Shield className="size-3 text-emerald-400 shrink-0" />
+            <span>Ambiente 100% Seguro e Encriptado</span>
           </div>
         </div>
       </footer>
