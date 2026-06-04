@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: oklch(0 0 0);
+  --color-foreground: oklch(0.98 0.005 20);
+  --color-card: oklch(0.08 0.01 20);
+  --color-neon: oklch(0.58 0.27 25);
+  --color-neon-2: oklch(0.5 0.3 18);
+  --color-muted-foreground: oklch(0.7 0.02 20);
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-poppins), system-ui, sans-serif;
+
+  --animate-blink: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@layer base {
+  body {
+    background-color: oklch(0 0 0);
+    color: oklch(0.98 0.005 20);
+  }
+}
+
+@utility radial-smoke {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, oklch(0.58 0.27 25 / 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 15% 85%, oklch(0.58 0.27 25 / 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 15%, oklch(0.58 0.27 25 / 0.05) 0%, transparent 60%);
+}
+
+@utility glow-neon {
+  box-shadow: 0 0 15px rgba(229, 9, 20, 0.5), 0 0 30px rgba(229, 9, 20, 0.25);
+}
+
+@utility glow-neon-sm {
+  box-shadow: 0 0 8px rgba(229, 9, 20, 0.4), 0 0 15px rgba(229, 9, 20, 0.2);
+}
+
+@utility text-gradient-neon {
+  background: linear-gradient(135deg, oklch(0.58 0.27 25), oklch(0.5 0.3 18));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility bg-gradient-neon {
+  background: linear-gradient(135deg, oklch(0.58 0.27 25), oklch(0.5 0.3 18));
+}
