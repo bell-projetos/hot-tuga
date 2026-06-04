@@ -15,3 +15,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 public/fotos/card4.gif
+public/fotos/card4_new.gif

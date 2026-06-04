@@ -37,7 +37,7 @@ const CARDS = [
     description: "Cenas privadas e exclusivas das criadoras trans mais seguidas em Portugal — sem censura.",
     badge: "🌟 EXCLUSIVO",
     cta: "Aceder ao Conteúdo",
-    image: "/fotos/card4.gif",
+    image: "/fotos/card4.mp4",
   },
   {
     id: 5,
@@ -149,15 +149,26 @@ export default function HubPage() {
             href={CONVERSION_URL}
             className="group relative rounded-2xl border border-white/10 bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-neon/60 hover:shadow-[0_30px_60px_-30px_rgba(229,9,20,0.6)] active:scale-[0.99]"
           >
-            {/* GIF com blur */}
+            {/* Media com blur */}
             <div className="relative aspect-[4/5] overflow-hidden bg-[radial-gradient(ellipse_at_center,oklch(0.18_0.08_25)_0%,oklch(0.06_0.01_20)_70%)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={card.image}
-                alt=""
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                className="absolute inset-0 w-full h-full object-cover blur-2xl brightness-50 scale-110 group-hover:blur-xl group-hover:brightness-60 transition-all duration-500"
-              />
+              {card.image.endsWith(".mp4") ? (
+                <video
+                  src={card.image}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 scale-110 group-hover:blur-sm group-hover:brightness-90 transition-all duration-500"
+                />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={card.image}
+                  alt=""
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 scale-110 group-hover:blur-sm group-hover:brightness-90 transition-all duration-500"
+                />
+              )}
 
               {/* Overlay cadeado */}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
