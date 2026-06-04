@@ -155,6 +155,7 @@ export default function HubPage() {
               <img
                 src={card.image}
                 alt=""
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 className="absolute inset-0 w-full h-full object-cover blur-2xl brightness-50 scale-110 group-hover:blur-xl group-hover:brightness-60 transition-all duration-500"
               />
 
