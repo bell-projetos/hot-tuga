@@ -150,7 +150,7 @@ export default function HubPage() {
             className="group relative rounded-2xl border border-white/10 bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-neon/60 hover:shadow-[0_30px_60px_-30px_rgba(229,9,20,0.6)] active:scale-[0.99]"
           >
             {/* GIF com blur */}
-            <div className="relative aspect-[4/5] overflow-hidden">
+            <div className="relative aspect-[4/5] overflow-hidden bg-[radial-gradient(ellipse_at_center,oklch(0.18_0.08_25)_0%,oklch(0.06_0.01_20)_70%)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={card.image}
