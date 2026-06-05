@@ -272,14 +272,14 @@ export default function HubPage() {
                 <video
                   src={card.image}
                   autoPlay loop muted playsInline
-                  className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 scale-110 group-hover:blur-sm group-hover:brightness-90 transition-all duration-500"
+                  className="absolute inset-0 w-full h-full object-cover blur-sm brightness-80 scale-110 group-hover:blur-none group-hover:brightness-90 transition-all duration-500"
                 />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={card.image} alt=""
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 scale-110 group-hover:blur-sm group-hover:brightness-90 transition-all duration-500"
+                  className="absolute inset-0 w-full h-full object-cover blur-sm brightness-80 scale-110 group-hover:blur-none group-hover:brightness-90 transition-all duration-500"
                 />
               )}
 
@@ -399,27 +399,27 @@ export default function HubPage() {
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-card via-black/40 to-transparent" />
 
-              {/* Close button */}
-              <button
-                onClick={() => setSelectedCard(null)}
-                className="absolute top-3 right-3 size-8 rounded-full bg-black/60 border border-white/20 flex items-center justify-center hover:bg-black/80 transition-colors"
-              >
-                <X className="size-4" />
-              </button>
-
               {/* Badge */}
-              <div className="absolute top-3 left-3">
+              <div className="absolute top-3 left-3 z-10">
                 <span className="text-xs px-3 py-1 rounded-full bg-black/70 border border-neon/40 text-foreground font-semibold backdrop-blur-sm">
                   {selectedCard.badge}
                 </span>
               </div>
 
               {/* Lock */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center z-10">
                 <div className="size-16 rounded-full bg-black/70 border border-neon/50 flex items-center justify-center glow-neon">
                   <Lock className="size-7 text-neon" />
                 </div>
               </div>
+
+              {/* Close button — z-20 para ficar acima do lock overlay */}
+              <button
+                onClick={() => setSelectedCard(null)}
+                className="absolute top-3 right-3 z-20 size-8 rounded-full bg-black/60 border border-white/20 flex items-center justify-center hover:bg-black/80 transition-colors"
+              >
+                <X className="size-4" />
+              </button>
             </div>
 
             {/* Conteúdo do modal */}
