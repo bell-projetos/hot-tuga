@@ -5,104 +5,11 @@ import { useRouter } from "next/navigation";
 import {
   Flame, Lock, ArrowRight, Shield, X,
   Play, ImageIcon, Eye, Users, Star,
-  Clock, ShoppingCart, CheckCircle, Zap,
+  Clock, ShoppingCart, CheckCircle, Zap, Loader2,
 } from "lucide-react";
-
-const CONVERSION_URL = "#";
-
-const CARDS = [
-  {
-    id: 1,
-    title: "Vazados das Famosinhas (PT)",
-    description: "Os flagras mais comentados das criadoras portuguesas — direto das stories e DMs privados.",
-    badge: "🔥 EM ALTA",
-    cta: "Liberar Acesso",
-    image: "/fotos/card1.gif",
-    stats: { videos: 47, fotos: 312, views: "89K", membros: "2,3K" },
-    price: "€19,90",
-    originalPrice: "€39,90",
-    rating: 4.9,
-    reviews: 318,
-  },
-  {
-    id: 2,
-    title: "OnlyFans & Privacy VIP",
-    description: "Pastas ocultas e conteúdos exclusivos de perfis privados portugueses.",
-    badge: "💎 PRIVADO",
-    cta: "Abrir Pasta",
-    image: "/fotos/card2.gif",
-    stats: { videos: 23, fotos: 156, views: "54K", membros: "1,8K" },
-    price: "€24,90",
-    originalPrice: "€49,90",
-    rating: 4.8,
-    reviews: 204,
-  },
-  {
-    id: 3,
-    title: "Amadoras & Flagras Reais",
-    description: "Conteúdo real, sem edições, de amadoras portuguesas — exatamente como foi captado.",
-    badge: "📸 NOVIDADE",
-    cta: "Ver Fotos/Vídeos",
-    image: "/fotos/card3.gif",
-    stats: { videos: 61, fotos: 428, views: "112K", membros: "3,1K" },
-    price: "€14,90",
-    originalPrice: "€29,90",
-    rating: 4.9,
-    reviews: 521,
-  },
-  {
-    id: 4,
-    title: "Transexuais Portuguesas Vazadas",
-    description: "Cenas privadas e exclusivas das criadoras trans mais seguidas em Portugal — sem censura.",
-    badge: "🌟 EXCLUSIVO",
-    cta: "Aceder ao Conteúdo",
-    image: "/fotos/card4.mp4",
-    stats: { videos: 34, fotos: 201, views: "67K", membros: "1,4K" },
-    price: "€19,90",
-    originalPrice: "€39,90",
-    rating: 4.8,
-    reviews: 176,
-  },
-  {
-    id: 5,
-    title: "Canais de Telegram Secretos",
-    description: "Links diretos e sem censura para os grupos mais exclusivos — sem listas de espera.",
-    badge: "⚡ IMEDIATO",
-    cta: "Entrar no Grupo",
-    image: "/fotos/card5.gif",
-    stats: { videos: 0, fotos: 0, views: "38K", membros: "12K" },
-    price: "€9,90",
-    originalPrice: "€19,90",
-    rating: 4.7,
-    reviews: 893,
-  },
-  {
-    id: 6,
-    title: "Arquivos Excluídos & Backstage",
-    description: "Conteúdos apagados das redes sociais que o algoritmo removeu — recuperados aqui.",
-    badge: "🚫 EXPIRANDO",
-    cta: "Recuperar Conteúdos",
-    image: "/fotos/card6.gif",
-    stats: { videos: 29, fotos: 187, views: "43K", membros: "890" },
-    price: "€17,90",
-    originalPrice: "€34,90",
-    rating: 4.8,
-    reviews: 142,
-  },
-  {
-    id: 7,
-    title: "Pack Premium da Semana",
-    description: "Coletânea selecionada da semana com o melhor conteúdo das criadoras portuguesas.",
-    badge: "⭐ COMPLETO",
-    cta: "Baixar Pack",
-    image: "/fotos/card7.gif",
-    stats: { videos: 38, fotos: 264, views: "78K", membros: "2,7K" },
-    price: "€29,90",
-    originalPrice: "€59,90",
-    rating: 4.9,
-    reviews: 437,
-  },
-];
+import { CARDS } from "@/lib/cards";
+import type { Card } from "@/lib/cards";
+import { getStoredTracking } from "@/lib/tracking";
 
 const NOTIF_NAMES = [
   "João M.", "Sofia R.", "Miguel A.", "Ana C.", "Pedro S.",
@@ -125,23 +32,11 @@ const NOTIF_ACTIONS = [
   "entrou no grupo secreto",
 ];
 
-interface Toast {
-  id: number;
-  name: string;
-  city: string;
-  action: string;
-}
+interface Toast { id: number; name: string; city: string; action: string; }
 
-type Card = typeof CARDS[0];
-
-function rand<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
+function rand<T>(arr: readonly T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 function formatCountdown(s: number) {
-  const m = Math.floor(s / 60).toString().padStart(2, "0");
-  const sec = (s % 60).toString().padStart(2, "0");
-  return `${m}:${sec}`;
+  return `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
 }
 
 export default function HubPage() {
@@ -150,15 +45,14 @@ export default function HubPage() {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [countdown, setCountdown] = useState(897);
+  const [loading, setLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
   let toastId = 0;
 
   useEffect(() => {
-    if (localStorage.getItem("pt_age_verified") !== "true") {
-      router.replace("/presell");
-    }
+    if (localStorage.getItem("pt_age_verified") !== "true") router.replace("/presell");
   }, [router]);
 
-  /* Ticker */
   useEffect(() => {
     const t = setInterval(() => {
       setOnlineCount((p) => Math.max(1400, Math.min(1800, p + Math.floor(Math.random() * 21) - 10)));
@@ -166,17 +60,16 @@ export default function HubPage() {
     return () => clearInterval(t);
   }, []);
 
-  /* Countdown no modal */
   useEffect(() => {
     if (!selectedCard) return;
     setCountdown(Math.floor(Math.random() * 600) + 600);
+    setCheckoutError("");
     const t = setInterval(() => {
       setCountdown((p) => (p <= 1 ? Math.floor(Math.random() * 600) + 600 : p - 1));
     }, 1000);
     return () => clearInterval(t);
   }, [selectedCard]);
 
-  /* Toast notifications */
   useEffect(() => {
     const fire = () => {
       const toast: Toast = {
@@ -186,30 +79,53 @@ export default function HubPage() {
         action: rand(NOTIF_ACTIONS),
       };
       setToasts((prev) => [...prev.slice(-2), toast]);
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== toast.id));
-      }, 5000);
+      setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== toast.id)), 5000);
     };
-
-    const schedule = () => {
+    const schedule = (): ReturnType<typeof setTimeout> => {
       const delay = Math.floor(Math.random() * 7000) + 8000;
       return setTimeout(() => { fire(); schedule(); }, delay);
     };
-
     const initial = setTimeout(fire, 3000);
     const loop = schedule();
     return () => { clearTimeout(initial); clearTimeout(loop); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* Fechar modal com Escape */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setSelectedCard(null); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const openCard = useCallback((card: Card) => setSelectedCard(card), []);
+  const openCard = useCallback((card: Card) => {
+    setSelectedCard(card);
+    setLoading(false);
+    setCheckoutError("");
+  }, []);
+
+  const handleCheckout = async () => {
+    if (!selectedCard || loading) return;
+    setLoading(true);
+    setCheckoutError("");
+    try {
+      const tracking = getStoredTracking();
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cardId: selectedCard.id, tracking }),
+      });
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        setCheckoutError("Erro ao criar checkout. Tenta novamente.");
+        setLoading(false);
+      }
+    } catch {
+      setCheckoutError("Erro de ligação. Tenta novamente.");
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -266,42 +182,26 @@ export default function HubPage() {
             onClick={() => openCard(card)}
             className="group relative rounded-2xl border border-white/10 bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-neon/60 hover:shadow-[0_30px_60px_-30px_rgba(229,9,20,0.6)] active:scale-[0.99] cursor-pointer"
           >
-            {/* Media */}
             <div className="relative aspect-[4/5] overflow-hidden bg-[radial-gradient(ellipse_at_center,oklch(0.18_0.08_25)_0%,oklch(0.06_0.01_20)_70%)]">
               {card.image.endsWith(".mp4") ? (
-                <video
-                  src={card.image}
-                  autoPlay loop muted playsInline
-                  className="absolute inset-0 w-full h-full object-cover blur-sm brightness-80 scale-110 group-hover:blur-none group-hover:brightness-90 transition-all duration-500"
-                />
+                <video src={card.image} autoPlay loop muted playsInline
+                  className="absolute inset-0 w-full h-full object-cover blur-sm brightness-80 scale-110 group-hover:blur-none group-hover:brightness-90 transition-all duration-500" />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={card.image} alt=""
+                <img src={card.image} alt=""
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  className="absolute inset-0 w-full h-full object-cover blur-sm brightness-80 scale-110 group-hover:blur-none group-hover:brightness-90 transition-all duration-500"
-                />
+                  className="absolute inset-0 w-full h-full object-cover blur-sm brightness-80 scale-110 group-hover:blur-none group-hover:brightness-90 transition-all duration-500" />
               )}
-
-              {/* Lock overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
                 <div className="size-14 rounded-full bg-black/60 border border-neon/40 flex items-center justify-center glow-neon-sm group-hover:scale-110 group-hover:glow-neon transition-all duration-300">
                   <Lock className="size-6 text-neon" />
                 </div>
                 <span className="text-xs text-muted-foreground font-medium">Conteúdo Bloqueado</span>
               </div>
-
-              {/* Gradiente fusão */}
               <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-card to-transparent z-10" />
-
-              {/* Badge */}
               <div className="absolute top-3 left-3 z-20">
-                <span className="text-xs px-3 py-1 rounded-full bg-black/70 border border-neon/40 text-foreground font-semibold backdrop-blur-sm">
-                  {card.badge}
-                </span>
+                <span className="text-xs px-3 py-1 rounded-full bg-black/70 border border-neon/40 text-foreground font-semibold backdrop-blur-sm">{card.badge}</span>
               </div>
-
-              {/* Mini stats overlay */}
               <div className="absolute bottom-3 inset-x-3 z-20 flex items-center justify-between">
                 {card.stats.videos > 0 && (
                   <span className="flex items-center gap-1 text-[10px] text-white/70 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-full">
@@ -313,13 +213,9 @@ export default function HubPage() {
                 </span>
               </div>
             </div>
-
-            {/* Corpo */}
             <div className="p-4">
               <h3 className="font-display font-bold text-base mb-1 line-clamp-1">{card.title}</h3>
               <p className="text-muted-foreground text-sm line-clamp-2 mb-3">{card.description}</p>
-
-              {/* Rating */}
               <div className="flex items-center gap-1.5 mb-3">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
@@ -329,10 +225,8 @@ export default function HubPage() {
                 <span className="text-xs text-muted-foreground">{card.rating} ({card.reviews})</span>
                 <span className="ml-auto text-xs text-neon font-bold">{card.price}</span>
               </div>
-
               <button className="w-full py-3 px-4 rounded-xl bg-gradient-neon text-white font-bold text-sm flex items-center justify-center gap-2 group-hover:scale-[1.01] group-hover:glow-neon active:scale-[0.98] transition-all duration-200">
-                {card.cta}
-                <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform duration-200" />
+                {card.cta}<ArrowRight className="size-4 group-hover:translate-x-1 transition-transform duration-200" />
               </button>
             </div>
           </div>
@@ -357,13 +251,10 @@ export default function HubPage() {
         </div>
       </footer>
 
-      {/* ── Toast Notifications ── */}
+      {/* Toast Notifications */}
       <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 pointer-events-none">
         {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/95 border border-white/10 backdrop-blur-xl shadow-2xl max-w-[300px] animate-slide-left"
-          >
+          <div key={toast.id} className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/95 border border-white/10 backdrop-blur-xl shadow-2xl max-w-[300px] animate-slide-left">
             <div className="size-9 rounded-full bg-gradient-neon flex items-center justify-center text-white font-bold text-sm shrink-0 glow-neon-sm">
               {toast.name[0]}
             </div>
@@ -378,15 +269,14 @@ export default function HubPage() {
         ))}
       </div>
 
-      {/* ── Modal de Detalhe ── */}
+      {/* Modal de Detalhe */}
       {selectedCard && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-sm animate-fade-in"
           onClick={(e) => { if (e.target === e.currentTarget) setSelectedCard(null); }}
         >
           <div className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl border border-neon/20 bg-card overflow-hidden animate-slide-up shadow-[0_40px_80px_-20px_rgba(229,9,20,0.4)]">
-
-            {/* Preview media */}
+            {/* Preview */}
             <div className="relative h-48 overflow-hidden bg-[radial-gradient(ellipse_at_center,oklch(0.18_0.08_25)_0%,oklch(0.06_0.01_20)_70%)]">
               {selectedCard.image.endsWith(".mp4") ? (
                 <video src={selectedCard.image} autoPlay loop muted playsInline
@@ -398,22 +288,14 @@ export default function HubPage() {
                   className="absolute inset-0 w-full h-full object-cover blur-sm brightness-60" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-card via-black/40 to-transparent" />
-
-              {/* Badge */}
               <div className="absolute top-3 left-3 z-10">
-                <span className="text-xs px-3 py-1 rounded-full bg-black/70 border border-neon/40 text-foreground font-semibold backdrop-blur-sm">
-                  {selectedCard.badge}
-                </span>
+                <span className="text-xs px-3 py-1 rounded-full bg-black/70 border border-neon/40 text-foreground font-semibold backdrop-blur-sm">{selectedCard.badge}</span>
               </div>
-
-              {/* Lock */}
               <div className="absolute inset-0 flex items-center justify-center z-10">
                 <div className="size-16 rounded-full bg-black/70 border border-neon/50 flex items-center justify-center glow-neon">
                   <Lock className="size-7 text-neon" />
                 </div>
               </div>
-
-              {/* Close button — z-20 para ficar acima do lock overlay */}
               <button
                 onClick={() => setSelectedCard(null)}
                 className="absolute top-3 right-3 z-20 size-8 rounded-full bg-black/60 border border-white/20 flex items-center justify-center hover:bg-black/80 transition-colors"
@@ -422,11 +304,9 @@ export default function HubPage() {
               </button>
             </div>
 
-            {/* Conteúdo do modal */}
+            {/* Conteúdo */}
             <div className="p-5">
               <h2 className="font-display font-black text-xl mb-1">{selectedCard.title}</h2>
-
-              {/* Rating */}
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
@@ -436,39 +316,27 @@ export default function HubPage() {
                 <span className="text-sm text-muted-foreground">{selectedCard.rating} · {selectedCard.reviews} avaliações</span>
               </div>
 
-              {/* Stats grid */}
+              {/* Stats */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 {selectedCard.stats.videos > 0 && (
                   <div className="flex items-center gap-3 bg-black/40 rounded-xl p-3 border border-white/5">
                     <Play className="size-5 text-neon shrink-0" />
-                    <div>
-                      <p className="font-bold text-base leading-none">{selectedCard.stats.videos}</p>
-                      <p className="text-xs text-muted-foreground">Vídeos</p>
-                    </div>
+                    <div><p className="font-bold text-base leading-none">{selectedCard.stats.videos}</p><p className="text-xs text-muted-foreground">Vídeos</p></div>
                   </div>
                 )}
                 {selectedCard.stats.fotos > 0 && (
                   <div className="flex items-center gap-3 bg-black/40 rounded-xl p-3 border border-white/5">
                     <ImageIcon className="size-5 text-neon shrink-0" />
-                    <div>
-                      <p className="font-bold text-base leading-none">{selectedCard.stats.fotos}</p>
-                      <p className="text-xs text-muted-foreground">Fotos</p>
-                    </div>
+                    <div><p className="font-bold text-base leading-none">{selectedCard.stats.fotos}</p><p className="text-xs text-muted-foreground">Fotos</p></div>
                   </div>
                 )}
                 <div className="flex items-center gap-3 bg-black/40 rounded-xl p-3 border border-white/5">
                   <Eye className="size-5 text-neon shrink-0" />
-                  <div>
-                    <p className="font-bold text-base leading-none">{selectedCard.stats.views}</p>
-                    <p className="text-xs text-muted-foreground">Visualizações</p>
-                  </div>
+                  <div><p className="font-bold text-base leading-none">{selectedCard.stats.views}</p><p className="text-xs text-muted-foreground">Visualizações</p></div>
                 </div>
                 <div className="flex items-center gap-3 bg-black/40 rounded-xl p-3 border border-white/5">
                   <Users className="size-5 text-neon shrink-0" />
-                  <div>
-                    <p className="font-bold text-base leading-none">{selectedCard.stats.membros}</p>
-                    <p className="text-xs text-muted-foreground">Membros</p>
-                  </div>
+                  <div><p className="font-bold text-base leading-none">{selectedCard.stats.membros}</p><p className="text-xs text-muted-foreground">Membros</p></div>
                 </div>
               </div>
 
@@ -492,17 +360,24 @@ export default function HubPage() {
                 </div>
               </div>
 
-              {/* Botão comprar */}
-              <a
-                href={CONVERSION_URL}
-                className="w-full py-4 rounded-xl bg-gradient-neon text-white font-black text-base flex items-center justify-center gap-2 glow-neon animate-pulse hover:scale-[1.02] active:scale-[0.98] transition-transform"
-              >
-                <ShoppingCart className="size-5" />
-                COMPRAR AGORA
-                <ArrowRight className="size-5" />
-              </a>
+              {/* Erro */}
+              {checkoutError && (
+                <p className="text-xs text-red-400 text-center mb-3">{checkoutError}</p>
+              )}
 
-              {/* Segurança */}
+              {/* Botão comprar */}
+              <button
+                onClick={handleCheckout}
+                disabled={loading}
+                className="w-full py-4 rounded-xl bg-gradient-neon text-white font-black text-base flex items-center justify-center gap-2 glow-neon animate-pulse hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-70 disabled:cursor-not-allowed disabled:scale-100"
+              >
+                {loading ? (
+                  <><Loader2 className="size-5 animate-spin" />A processar...</>
+                ) : (
+                  <><ShoppingCart className="size-5" />COMPRAR AGORA<ArrowRight className="size-5" /></>
+                )}
+              </button>
+
               <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground/60">
                 <span className="flex items-center gap-1"><Shield className="size-3 text-emerald-400" />Pagamento seguro</span>
                 <span className="flex items-center gap-1"><CheckCircle className="size-3 text-emerald-400" />Acesso imediato</span>
