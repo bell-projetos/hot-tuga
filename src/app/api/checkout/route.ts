@@ -12,13 +12,13 @@ const toCents = (v: number) => Math.round(v * 100);
 
 async function sendUtmify(payload: Record<string, unknown>) {
   const token = process.env.UTMIFY_API_TOKEN;
-  if (!token) return;
+  if (!token) { console.warn("[utmify] UTMIFY_API_TOKEN missing"); return; }
   const res = await fetch(UTMIFY_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-token": token },
     body: JSON.stringify(payload),
   });
-  console.log("UTMify waiting_payment:", res.status);
+  console.log("[utmify] waiting_payment →", res.status, await res.text());
 }
 
 export async function POST(req: NextRequest) {
@@ -27,43 +27,64 @@ export async function POST(req: NextRequest) {
   const card = CARDS.find((c) => c.id === cardId);
   if (!card) return NextResponse.json({ error: "Card not found" }, { status: 404 });
 
-  const orderId = `order_${Date.now()}_${cardId}`;
-  const base = process.env.NEXT_PUBLIC_BASE_URL ?? "https://hot-tuga.vercel.app";
+  const apiKey = process.env.NEXOR_SECRET_KEY;
+  const workspaceId = process.env.NEXOR_WORKSPACE_ID;
 
-  // 1. Criar sessão de checkout na WaylinxPay
+  if (!apiKey || !workspaceId) {
+    console.error("[checkout] env vars missing: NEXOR_SECRET_KEY or NEXOR_WORKSPACE_ID");
+    return NextResponse.json({ error: "Configuração de pagamento em falta" }, { status: 503 });
+  }
+
+  const orderId = `order_${Date.now()}_${cardId}`;
+
+  // Payload mínimo conforme a documentação da WaylinxPay
+  const checkoutPayload = {
+    workspaceId,
+    item_count: 1,
+    total_price: card.priceAmount,
+    currency: "BRL",
+    language: "pt-BR",
+    sessionId: orderId,
+    cartItems: [{
+      productId: `prod_${cardId}`,
+      title: card.title,
+      price: card.priceAmount,
+      quantity: 1,
+    }],
+  };
+
+  console.log("[checkout] → WaylinxPay payload:", JSON.stringify(checkoutPayload));
+
   const checkoutRes = await fetch("https://api.waylinxpay.com/checkout/create-checkout-session", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": process.env.NEXOR_SECRET_KEY!,
+      "x-api-key": apiKey,
     },
-    body: JSON.stringify({
-      workspaceId: process.env.NEXOR_WORKSPACE_ID,
-      item_count: 1,
-      total_price: card.priceAmount,
-      currency: "BRL",
-      language: "pt-BR",
-      sessionId: orderId,
-      successUrl: `${base}/sucesso?orderId=${orderId}&value=${card.priceAmount}&currency=EUR`,
-      cancelUrl: `${base}/`,
-      cartItems: [{
-        productId: `prod_${cardId}`,
-        title: card.title,
-        price: card.priceAmount,
-        quantity: 1,
-      }],
-    }),
+    body: JSON.stringify(checkoutPayload),
   });
 
+  const responseText = await checkoutRes.text();
+  console.log("[checkout] ← WaylinxPay status:", checkoutRes.status, "body:", responseText);
+
   if (!checkoutRes.ok) {
-    const err = await checkoutRes.text();
-    console.error("WaylinxPay error:", checkoutRes.status, err);
-    return NextResponse.json({ error: "Falha ao criar checkout" }, { status: 502 });
+    return NextResponse.json(
+      { error: "Falha ao criar checkout", detail: responseText, status: checkoutRes.status },
+      { status: 502 }
+    );
   }
 
-  const { checkoutUrl, checkoutSessionId } = await checkoutRes.json();
+  let parsed: { checkoutUrl?: string; checkoutSessionId?: string };
+  try { parsed = JSON.parse(responseText); } catch {
+    return NextResponse.json({ error: "Resposta inválida do gateway" }, { status: 502 });
+  }
 
-  // 2. UTMify waiting_payment (fire-and-forget)
+  const { checkoutUrl, checkoutSessionId } = parsed;
+  if (!checkoutUrl) {
+    return NextResponse.json({ error: "checkoutUrl não retornado", detail: responseText }, { status: 502 });
+  }
+
+  // UTMify waiting_payment (fire-and-forget)
   sendUtmify({
     orderId,
     platform: "HotTuga",
@@ -75,8 +96,7 @@ export async function POST(req: NextRequest) {
     products: [{
       id: `prod_${cardId}`,
       name: card.title,
-      planId: null,
-      planName: null,
+      planId: null, planName: null,
       quantity: 1,
       priceInCents: toCents(card.priceAmount),
     }],
