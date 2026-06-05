@@ -55,21 +55,28 @@ export async function POST(req: NextRequest) {
 
   console.log("[checkout] → WaylinxPay payload:", JSON.stringify(checkoutPayload));
 
-  const checkoutRes = await fetch("https://api.waylinxpay.com/checkout/create-checkout-session", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-    },
-    body: JSON.stringify(checkoutPayload),
-  });
+  let checkoutRes: Response;
+  try {
+    checkoutRes = await fetch("https://api.waylinxpay.com/checkout/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(checkoutPayload),
+    });
+  } catch (e) {
+    console.error("[checkout] fetch NETWORK ERROR:", String(e));
+    return NextResponse.json({ error: "Erro de rede ao contactar gateway", detail: String(e) }, { status: 502 });
+  }
 
   const responseText = await checkoutRes.text();
   console.log("[checkout] ← WaylinxPay status:", checkoutRes.status, "body:", responseText);
 
   if (!checkoutRes.ok) {
     return NextResponse.json(
-      { error: "Falha ao criar checkout", detail: responseText, status: checkoutRes.status },
+      { error: "Falha ao criar checkout", detail: responseText, wlStatus: checkoutRes.status },
       { status: 502 }
     );
   }
