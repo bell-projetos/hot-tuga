@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { CARDS } from "@/lib/cards";
 
 const UTMIFY_URL = "https://api.utmify.com.br/api-credentials/orders";
@@ -35,7 +36,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Configuração de pagamento em falta" }, { status: 503 });
   }
 
-  const orderId = `order_${Date.now()}_${cardId}`;
+  const sessionToken = randomBytes(12).toString("hex");
+  const orderId = `sess_${sessionToken}`;
 
   // Payload mínimo conforme a documentação da WaylinxPay
   const checkoutPayload = {
