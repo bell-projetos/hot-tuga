@@ -176,12 +176,12 @@ export default function HubPage() {
             <div className="relative aspect-[4/5] overflow-hidden bg-[radial-gradient(ellipse_at_center,oklch(0.18_0.08_25)_0%,oklch(0.06_0.01_20)_70%)]">
               {card.image.endsWith(".mp4") ? (
                 <video src={card.image} autoPlay loop muted playsInline
-                  className="absolute inset-0 w-full h-full object-cover blur-sm brightness-80 scale-110 group-hover:blur-none group-hover:brightness-90 transition-all duration-500" />
+                  className="absolute inset-0 w-full h-full object-cover brightness-75 scale-105 group-hover:brightness-95 transition-all duration-500" />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={card.image} alt=""
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  className="absolute inset-0 w-full h-full object-cover blur-sm brightness-80 scale-110 group-hover:blur-none group-hover:brightness-90 transition-all duration-500" />
+                  className="absolute inset-0 w-full h-full object-cover brightness-75 scale-105 group-hover:brightness-95 transition-all duration-500" />
               )}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
                 <div className="size-14 rounded-full bg-black/60 border border-neon/40 flex items-center justify-center glow-neon-sm group-hover:scale-110 group-hover:glow-neon transition-all duration-300">
