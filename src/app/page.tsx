@@ -103,28 +103,19 @@ export default function HubPage() {
     setCheckoutError("");
   }, []);
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!selectedCard || loading) return;
     setLoading(true);
-    setCheckoutError("");
-    try {
-      const tracking = getStoredTracking();
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cardId: selectedCard.id, tracking }),
-      });
-      const data = await res.json();
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      } else {
-        setCheckoutError("Erro ao criar checkout. Tenta novamente.");
-        setLoading(false);
-      }
-    } catch {
-      setCheckoutError("Erro de ligação. Tenta novamente.");
-      setLoading(false);
-    }
+    // Fire UTMify waiting_payment em background (sem bloquear o redirect)
+    const tracking = getStoredTracking();
+    fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cardId: selectedCard.id, tracking }),
+      keepalive: true,
+    }).catch(() => {});
+    // Redirect imediato para o checkout pré-criado
+    window.location.href = selectedCard.checkoutUrl;
   };
 
   return (
